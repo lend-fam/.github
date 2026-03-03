@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/lend-fam/frontend/main/src/assets/svg/logo-large.svg" alt="lend.fam" width="280" />
+  <img src="https://raw.githubusercontent.com/lend-fam/.github/main/profile/logo.svg" alt="lend.fam" width="320" />
 </p>
 
 <h3 align="center">NFT Collection-Backed Lending on ApeChain</h3>
@@ -29,49 +29,22 @@ lend.fam is a **subsidized lending protocol** where NFT holders borrow against t
 
 ## How It Works
 
-```
-Depositors supply assets (e.g. USDC)
-        │
-        ▼
-   ┌─────────────────────────────────────────┐
-   │  Collection Vault (ERC-1155 multi-pool)  │
-   │                                          │
-   │  Assets → Compound V2 fork → Yield       │
-   │                                          │
-   │  Yield split:                            │
-   │    80% → Depositors (higher share price) │
-   │    20% → Subsidy reserve                 │
-   └─────────────────────────────────────────┘
-        │                           │
-        ▼                           ▼
-  Depositors earn            Subsidy pool grows
-  interest on deposits       each block
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │  Epoch Server (Go)    │
-                         │                       │
-                         │  Queries indexer for   │
-                         │  borrower debt-seconds │
-                         │  Builds Merkle tree    │
-                         │  Executes on-chain     │
-                         │  batch repayments      │
-                         └──────────────────────┘
-                                    │
-                                    ▼
-                         Borrowers' debt reduced
-                         proportional to their
-                         usage (debt × time)
-```
+**1. Deposit** — Lenders supply assets (e.g. USDC) into collection-specific vault pools (ERC-1155 shares).
+
+**2. Earn** — The vault deposits assets into a Compound V2 fork to generate yield. Depositors receive ~80% of the interest as higher share value.
+
+**3. Reserve** — The remaining ~20% of yield is set aside as a **subsidy reserve** for borrowers.
+
+**4. Distribute** — At each epoch, the off-chain server calculates each borrower's share of the subsidy pool based on **debt-seconds** (loan amount x time), builds a Merkle tree, and executes batch repayments on-chain — automatically reducing borrowers' debt.
 
 ## Repository Structure
 
-| Directory | Language | Description |
+| Repository | Language | Description |
 |-----------|----------|-------------|
-| [`collection-vault`](https://github.com/lend-fam/collection-vault) | Solidity | ERC-1155 multi-token vault with per-collection accounting, yield accrual via Compound integration, Merkle-based subsidy claims, and circuit breaker security |
-| [`compound-fork`](https://github.com/lend-fam/compound-fork) | Solidity | Compound V2 fork with Pyth Network oracle integration, JSON-configured deployment system, and multi-oracle support for ApeChain |
-| [`envio-subsidy-indexer`](https://github.com/lend-fam/envio-subsidy-indexer) | TypeScript | Envio-based event indexer tracking deposits, borrows, and debt-seconds accumulation with clean layered architecture (domain/app/infra/handlers) |
-| [`epoch-server`](https://github.com/lend-fam/epoch-server) | Go | Backend service orchestrating periodic subsidy distributions — fetches indexer data, computes allocations, generates Merkle proofs, and submits on-chain transactions |
+| [`collection-vault`](https://github.com/lend-fam/collection-vault) | Solidity | ERC-1155 multi-token vault with per-collection accounting, yield accrual via Compound, Merkle-based subsidy claims, and circuit breaker security |
+| [`compound-fork`](https://github.com/lend-fam/compound-fork) | Solidity | Compound V2 fork with Pyth Network oracle, JSON-configured deployment, and multi-oracle support for ApeChain |
+| [`envio-subsidy-indexer`](https://github.com/lend-fam/envio-subsidy-indexer) | TypeScript | Envio-based event indexer tracking deposits, borrows, and debt-seconds with clean layered architecture |
+| [`epoch-server`](https://github.com/lend-fam/epoch-server) | Go | Backend orchestrating periodic subsidy distributions — computes allocations, generates Merkle proofs, submits on-chain transactions |
 | [`frontend`](https://github.com/lend-fam/frontend) | TypeScript | React DApp with RainbowKit wallet integration, real-time market data, APY charts, and multi-collection vault interface |
 
 ## Tech Stack
